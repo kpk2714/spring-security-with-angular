@@ -9,6 +9,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -35,7 +36,7 @@ public class WebSecurityConfiguration{
 		
 		http.csrf(csrf -> csrf.disable())
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/save","/login","/auth/logout", "/user").permitAll()
+			.authorizeHttpRequests(auth -> auth.requestMatchers("/save","/login","/auth/logout","/user").permitAll()
 									   .requestMatchers("/home").hasAuthority("ROLE_STUDENT")
 									   .requestMatchers("/about").hasAuthority("ROLE_ADMIN")
 									   .anyRequest().authenticated()
@@ -50,7 +51,10 @@ public class WebSecurityConfiguration{
 										  //.invalidateHttpSession(true)
 										  //.deleteCookies("JSESSIONID", "remember-me")
 										  .permitAll()
-								  );
+								  )
+								  .sessionManagement( session -> session
+										  .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+								   );
 								 
 		return http.build();
 	}

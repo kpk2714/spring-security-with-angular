@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,18 +35,23 @@ public class LoginController {
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 			
 			Authentication authentication = authenticationManager.authenticate(token);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+			
+			SecurityContext securityContext = SecurityContextHolder.getContext();
+			securityContext.setAuthentication(authentication);
+			request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", securityContext); // Store auth in session
 			
 			String role = authentication.getAuthorities().iterator().next().getAuthority();
+			
+			System.out.println("Remember Me Applied -> "+loginRequest.isRememberMe());
 			
 			Map<String, String> responseBody = new HashMap<>();
 			System.out.println("Role -> "+role);
 			if (role.equals("ROLE_ADMIN")) {
-				responseBody.put("redirectUrl", "/about");
+				responseBody.put("redirectUrl", "/admin-dashboard");
 				responseBody.put("role", role);
 				responseBody.put("username", authentication.getName());
             } else if (role.equals("ROLE_STUDENT")) {
-            	responseBody.put("redirectUrl", "/home");
+            	responseBody.put("redirectUrl", "/student-dashboard");
             	responseBody.put("role", role);
             	responseBody.put("username", authentication.getName());
             } else {

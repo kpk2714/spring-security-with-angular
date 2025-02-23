@@ -36,5 +36,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return this.userRepository.save(user);
 	}
+	
+	public User getUserDetails(String username) {
+		return userRepository.findByUsername(username);
+	}
 
 }

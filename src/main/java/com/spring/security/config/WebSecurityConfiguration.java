@@ -2,6 +2,9 @@ package com.spring.security.config;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,15 +16,28 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.spring.security.service.CustomUserDetailsService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration{
+	
+	private static final String REMEMBER_ME_KEY = "my-remember-me-key";
+	
+	@Autowired
+    private CustomUserDetailsService userDetailsService;
+	
+	@Autowired
+	private DataSource dataSource;
 	
 	@Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
@@ -54,10 +70,31 @@ public class WebSecurityConfiguration{
 								  )
 								  .sessionManagement( session -> session
 										  .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-								   );
+								   )
+								  .rememberMe( rememberMe -> rememberMe
+										  .key(REMEMBER_ME_KEY)  // 🔴 REQUIRED! Without this, tokens are not stored.
+										  .rememberMeParameter("remember-me")  // Must match frontend parameter
+										  .tokenRepository(persistentTokenRepository())
+										  .userDetailsService(userDetailsService)
+										  .tokenValiditySeconds(40)
+								  );
 								 
 		return http.build();
 	}
+	
+	@Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
+        repo.setDataSource(dataSource);
+        return repo;
+    }
+	
+	@Bean
+	public PersistentTokenBasedRememberMeServices rememberMeServices() {
+        return new PersistentTokenBasedRememberMeServices(
+        		REMEMBER_ME_KEY , userDetailsService, persistentTokenRepository()
+        );
+    }
 	
 	@Bean
     public CorsConfigurationSource corsConfigurationSource() {

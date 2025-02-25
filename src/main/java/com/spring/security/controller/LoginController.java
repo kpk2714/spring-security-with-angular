@@ -12,9 +12,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.security.entities.LoginRequest;
@@ -28,11 +31,14 @@ public class LoginController {
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private PersistentTokenBasedRememberMeServices rememberMeServices;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<?> login(@RequestParam(name="username") String username, @RequestParam(name="password") String password, @RequestParam(name="remember-me") boolean rememberMe, HttpServletRequest request, HttpServletResponse response) {
 		try {
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 			
 			Authentication authentication = authenticationManager.authenticate(token);
 			
@@ -40,9 +46,19 @@ public class LoginController {
 			securityContext.setAuthentication(authentication);
 			request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", securityContext); // Store auth in session
 			
+			if(rememberMe) {
+				
+				rememberMeServices.loginSuccess(request, response, authentication);
+			
+				System.out.println("Remember Me - Token Generated!");
+				UserDetails userDetails = (UserDetails)authentication.getPrincipal();
+			
+				System.out.println("Logged In User - "+userDetails.getUsername()+" -- "+userDetails.getPassword());
+			}
+			
 			String role = authentication.getAuthorities().iterator().next().getAuthority();
 			
-			System.out.println("Remember Me Applied -> "+loginRequest.isRememberMe());
+			System.out.println("Remember Me Applied -> "+rememberMe);
 			
 			Map<String, String> responseBody = new HashMap<>();
 			System.out.println("Role -> "+role);

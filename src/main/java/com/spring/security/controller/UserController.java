@@ -51,6 +51,8 @@ public class UserController {
 			
 		String username = authentication.getName();
 		
+		System.out.println("/User -> Username + "+username);
+		
 		User user = customUserDetailsService.getUserDetails(username);
 
 		UserResponse userResponse = new UserResponse(user.getId(),user.getName(),user.getUsername());

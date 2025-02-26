@@ -400,3 +400,447 @@ public class UserController {
 	}
 	
 }
+
+
+com.spring.security.entities  =>  LoginRequest.java
+
+
+package com.spring.security.entities;
+
+
+public class LoginRequest {
+
+	private String username;
+	private String password;
+	private boolean rememberMe;
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public boolean isRememberMe() {
+		return rememberMe;
+	}
+	public void setRememberMe(boolean rememberMe) {
+		this.rememberMe = rememberMe;
+	}
+	@Override
+	public String toString() {
+		return "LoginRequest [username=" + username + ", password=" + password + ", rememberMe=" + rememberMe + "]";
+	}
+	public LoginRequest() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public LoginRequest(String username, String password, boolean rememberMe) {
+		super();
+		this.username = username;
+		this.password = password;
+		this.rememberMe = rememberMe;
+	}
+	
+	
+}
+
+
+com.spring.security.entities  =>  PersistentLogin.java
+
+
+package com.spring.security.entities;
+
+import java.util.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
+@Entity
+
+@Table(name = "persistent_logins")
+
+public class PersistentLogin {
+
+	 	@Id
+	    private String series;
+	    
+	    @Column(nullable = false)
+	    private String username;
+	    
+	    @Column(nullable = false)
+	    private String token;
+	    
+	    @Temporal(TemporalType.TIMESTAMP)
+	    private Date lastUsed;
+
+		public String getSeries() {
+			return series;
+		}
+
+		public void setSeries(String series) {
+			this.series = series;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getToken() {
+			return token;
+		}
+
+		public void setToken(String token) {
+			this.token = token;
+		}
+
+		public Date getLastUsed() {
+			return lastUsed;
+		}
+
+		public void setLastUsed(Date lastUsed) {
+			this.lastUsed = lastUsed;
+		}
+
+		@Override
+		public String toString() {
+			return "PersistentLogin [series=" + series + ", username=" + username + ", token=" + token + ", lastUsed="
+					+ lastUsed + "]";
+		}
+
+		public PersistentLogin(String series, String username, String token, Date lastUsed) {
+			super();
+			this.series = series;
+			this.username = username;
+			this.token = token;
+			this.lastUsed = lastUsed;
+		}
+
+		public PersistentLogin() {
+			super();
+			// TODO Auto-generated constructor stub
+		}
+	    
+	    
+}
+
+
+com.spring.security.entities  =>  User.java
+
+
+package com.spring.security.entities;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
+
+public class User {
+
+	@Id
+	private int id;
+	private String name;
+	private String username;
+	private String password;
+	private String role;
+	private Boolean enabled;
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
+	}
+	public Boolean getEnabled() {
+		return enabled;
+	}
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	@Override
+	public String toString() {
+		return "Login [id=" + id + ", name=" + name + ", username=" + username + ", password=" + password + ", role="
+				+ role + ", enabled=" + enabled + "]";
+	}
+	
+}
+
+
+com.spring.security.entities  =>  UserResponse.java
+
+
+package com.spring.security.entities;
+
+public class UserResponse {
+
+	private int id;
+	private String name;
+	private String username;
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public UserResponse(int id, String name, String username) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.username = username;
+	}
+	public UserResponse() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "UserResponse [id=" + id + ", name=" + name + ", username=" + username + "]";
+	}
+	
+	
+}
+
+
+com.spring.security.repository  =>  UserRepository.java
+
+package com.spring.security.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.spring.security.entities.User;
+
+@Repository
+
+public interface UserRepository extends JpaRepository<User, Integer> {
+	public User findByUsername(String username);
+}
+
+
+
+com.spring.security.service  =>  CustomUserDetailsService.java
+
+
+package com.spring.security.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.spring.security.entities.User;
+import com.spring.security.repository.UserRepository;
+import com.spring.security.userdetails.CustomUserDetails;
+
+
+@Service
+
+public class CustomUserDetailsService implements UserDetailsService {
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+		User user = userRepository.findByUsername(username);
+		if(user==null) {
+			throw new UsernameNotFoundException("User Not Found !!!");
+		}
+		
+		return new CustomUserDetails(user);
+	}
+	
+	public User saveUser(User user) {
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		return this.userRepository.save(user);
+	}
+	
+	public User getUserDetails(String username) {
+		return userRepository.findByUsername(username);
+	}
+
+}
+
+
+com.spring.security.userDetails  =>  CustomUserDetails.java
+
+
+package com.spring.security.userdetails;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.spring.security.entities.User;
+
+
+public class CustomUserDetails implements UserDetails{
+	
+	private User user;
+	
+	public CustomUserDetails(User user) {
+		super();
+		this.user = user;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		System.out.println(this.user.getRole());
+		return Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getRole()));
+	}
+
+	@Override
+	public String getPassword() {
+		return user.getPassword();
+	}
+
+	@Override
+	public String getUsername() {
+		return user.getUsername();
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+}
+
+
+
+Application.properties 
+
+
+spring.application.name=SpringSecurityWithAngular
+
+spring.datasource.url = jdbc:mysql://localhost:3306/loginWithSpringSecurity
+spring.datasource.username = root
+spring.datasource.password = Mitra@123
+spring.datasource.driver-class-name = com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.properties.hiberate.show_sql = true
+spring.jpa.properties.hiberate.format_sql = true
+
+
+server.port=9898
+
+
+
+
+Pom.xml => Dependencies ---  
+
+
+<dependencies>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-data-jpa</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-security</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-devtools</artifactId>
+		<scope>runtime</scope>
+		<optional>true</optional>
+	</dependency>
+	<dependency>
+		<groupId>com.mysql</groupId>
+		<artifactId>mysql-connector-j</artifactId>
+		<scope>runtime</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<optional>true</optional>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-test</artifactId>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.security</groupId>
+		<artifactId>spring-security-test</artifactId>
+		<scope>test</scope>
+	</dependency>
+</dependencies>

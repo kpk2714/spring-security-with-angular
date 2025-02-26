@@ -64,8 +64,8 @@ public class WebSecurityConfiguration{
 										  .logoutSuccessHandler((request, response, authentication) -> {
 											  response.setStatus(HttpServletResponse.SC_OK);
 										  })
-										  //.invalidateHttpSession(true)
-										  //.deleteCookies("JSESSIONID", "remember-me")
+										  .invalidateHttpSession(true)
+										  .deleteCookies("JSESSIONID", "remember-me")
 										  .permitAll()
 								  )
 								  .sessionManagement( session -> session

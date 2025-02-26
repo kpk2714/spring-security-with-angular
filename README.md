@@ -786,8 +786,11 @@ Application.properties
 spring.application.name=SpringSecurityWithAngular
 
 spring.datasource.url = jdbc:mysql://localhost:3306/loginWithSpringSecurity
+
 spring.datasource.username = root
-spring.datasource.password = Mitra@123
+
+spring.datasource.password = 
+
 spring.datasource.driver-class-name = com.mysql.cj.jdbc.Driver
 
 spring.jpa.hibernate.ddl-auto=update

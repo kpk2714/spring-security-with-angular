@@ -60,10 +60,10 @@ public class WebSecurityConfiguration{
 			
 								  .formLogin(form -> form.disable())
 								  .logout(logout -> logout
-										  .logoutUrl("/auth/logout")
-										  .logoutSuccessHandler((request, response, authentication) -> {
-											  response.setStatus(HttpServletResponse.SC_OK);
-										  })
+//										  .logoutUrl("/logout")
+//										  .logoutSuccessHandler((request, response, authentication) -> {
+//											  response.setStatus(HttpServletResponse.SC_OK);
+//										  })
 										  .invalidateHttpSession(true)
 										  .deleteCookies("JSESSIONID", "remember-me")
 										  .permitAll()
@@ -74,9 +74,9 @@ public class WebSecurityConfiguration{
 								  .rememberMe( rememberMe -> rememberMe
 										  .key(REMEMBER_ME_KEY)  // 🔴 REQUIRED! Without this, tokens are not stored.
 										  .rememberMeParameter("remember-me")  // Must match frontend parameter
+										  .rememberMeServices(rememberMeServices())
 										  .tokenRepository(persistentTokenRepository())
 										  .userDetailsService(userDetailsService)
-										  .tokenValiditySeconds(40)
 								  );
 								 
 		return http.build();
@@ -91,9 +91,12 @@ public class WebSecurityConfiguration{
 	
 	@Bean
 	public PersistentTokenBasedRememberMeServices rememberMeServices() {
-        return new PersistentTokenBasedRememberMeServices(
+		PersistentTokenBasedRememberMeServices services = new PersistentTokenBasedRememberMeServices(
         		REMEMBER_ME_KEY , userDetailsService, persistentTokenRepository()
         );
+		
+		services.setTokenValiditySeconds(7 * 24 * 60 * 60);
+		return services;
     }
 	
 	@Bean
